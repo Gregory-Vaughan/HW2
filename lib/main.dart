@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(CalculatorApp());
-}
-
-class CalculatorApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: CalculatorScreen(),
-    );
-  }
-}
+import 'package:math_expressions/math_expressions.dart';  
 
 class CalculatorScreen extends StatefulWidget {
+  const CalculatorScreen({super.key});
+
   @override
   _CalculatorScreenState createState() => _CalculatorScreenState();
 }
@@ -22,6 +11,36 @@ class CalculatorScreen extends StatefulWidget {
 class _CalculatorScreenState extends State<CalculatorScreen> {
   String input = "";
   String result = "0";
+
+  void onButtonPressed(String value) {
+    setState(() {
+      if (value == "C") {
+        input = "";
+        result = "0";
+      } else if (value == "=") {
+        if (input.isNotEmpty) calculateResult();
+      } else {
+        // Prevents multiple consecutive operators
+        if ("+-*/".contains(value) && input.isEmpty) return;
+        if ("+-*/".contains(value) && "+-*/".contains(input[input.length - 1])) return;
+
+        input += value;
+      }
+    });
+  }
+
+  void calculateResult() {
+    try {
+      Parser p = Parser();
+      Expression exp = p.parse(input);
+      ContextModel cm = ContextModel();
+      double eval = exp.evaluate(EvaluationType.REAL, cm);
+      result = eval.toString();
+    } catch (e) {
+      result = "Error";
+    }
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +98,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Padding(
       padding: EdgeInsets.all(10),
       child: InkWell(
-        onTap: () {
-          // Does nothing RN
-        },
+        onTap: () => onButtonPressed(text),
         child: Container(
           width: 70,
           height: 70,
