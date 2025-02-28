@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:math_expressions/math_expressions.dart';  
+import 'package:math_expressions/math_expressions.dart';
 
 class CalculatorScreen extends StatefulWidget {
-  const CalculatorScreen({super.key});
-
   @override
   _CalculatorScreenState createState() => _CalculatorScreenState();
 }
@@ -20,7 +18,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       } else if (value == "=") {
         if (input.isNotEmpty) calculateResult();
       } else {
-        // Prevents multiple consecutive operators
         if ("+-*/".contains(value) && input.isEmpty) return;
         if ("+-*/".contains(value) && "+-*/".contains(input[input.length - 1])) return;
 
@@ -37,7 +34,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       double eval = exp.evaluate(EvaluationType.REAL, cm);
       result = eval.toString();
     } catch (e) {
-      result = "Error";
+      result = "An Error has occured.";
     }
     setState(() {});
   }
@@ -58,18 +55,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget buildDisplay() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
       alignment: Alignment.centerRight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
             input,
-            style: TextStyle(fontSize: 32, color: Colors.white70),
+            style: TextStyle(fontSize: 36, color: Colors.white70),
           ),
+          SizedBox(height: 10),
           Text(
             result,
-            style: TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 50, color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -79,38 +77,45 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget buildButtons() {
     return Column(
       children: [
-        buildButtonRow(["7", "8", "9", "/"]),
-        buildButtonRow(["4", "5", "6", "*"]),
-        buildButtonRow(["1", "2", "3", "-"]),
-        buildButtonRow(["0", "C", "=", "+"]),
+        buildButtonRow(["C", "", "", "/"], Colors.redAccent),
+        buildButtonRow(["7", "8", "9", "*"]),
+        buildButtonRow(["4", "5", "6", "-"]),
+        buildButtonRow(["1", "2", "3", "+"]),
+        buildButtonRow(["0", "", "=", ""], Colors.orange),
       ],
     );
   }
 
-  Widget buildButtonRow(List<String> buttons) {
+  Widget buildButtonRow(List<String> buttons, [Color? operatorColor]) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: buttons.map((text) => buildButton(text)).toList(),
+      children: buttons.map((text) {
+        bool isOperator = "+-*/=".contains(text);
+        return buildButton(
+          text,
+          color: isOperator ? (operatorColor ?? Colors.blueAccent) : null,
+        );
+      }).toList(),
     );
   }
 
-  Widget buildButton(String text) {
+  Widget buildButton(String text, {Color? color, double fontSize = 24}) {
     return Padding(
       padding: EdgeInsets.all(10),
       child: InkWell(
         onTap: () => onButtonPressed(text),
         child: Container(
-          width: 70,
-          height: 70,
+          width: 80,
+          height: 80,
           decoration: BoxDecoration(
-            color: text == "C" ? Colors.red : Colors.grey[800],
+            color: color ?? Colors.grey[850],
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Text(
               text,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: fontSize,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
